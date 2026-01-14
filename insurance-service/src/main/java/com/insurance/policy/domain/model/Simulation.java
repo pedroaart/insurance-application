@@ -19,5 +19,18 @@ public class Simulation {
     private PolicyType policyType;
     private BigDecimal coverageAmount;
     private BigDecimal monthlyPremium;
+    private BigDecimal annualPremium;
     private LocalDateTime simulatedAt;
+
+    public static Simulation fromPolicyType(UUID customerId, PolicyType policyType) {
+        return Simulation.builder()
+                .id(UUID.randomUUID())
+                .customerId(customerId)
+                .policyType(policyType)
+                .coverageAmount(policyType.getCoverageAmount())
+                .monthlyPremium(policyType.getMonthlyPremium())
+                .annualPremium(policyType.getAnnualPremium())
+                .simulatedAt(LocalDateTime.now())
+                .build();
+    }
 }

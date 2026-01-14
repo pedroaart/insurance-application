@@ -6,6 +6,7 @@
 /app/src/main/java/com/insurance/customer/adapter/out/cache/CustomerCacheAdapter.java
 /app/src/main/java/com/insurance/customer/CustomerServiceApplication.java
 /app/src/main/java/com/insurance/customer/adapter/out/persistence/repository/JpaCustomerRepository.java
+/app/src/main/java/com/insurance/customer/application/exception/InvalidCustomerDataException.java
 /app/src/main/java/com/insurance/customer/adapter/out/persistence/mapper/CustomerPersistenceMapper.java
 /app/src/main/java/com/insurance/customer/domain/port/in/CreateCustomerUseCase.java
 /app/src/main/java/com/insurance/customer/application/exception/CustomerAlreadyExistsException.java

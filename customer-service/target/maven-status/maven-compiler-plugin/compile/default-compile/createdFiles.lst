@@ -32,6 +32,7 @@ com/insurance/customer/adapter/out/persistence/entity/AddressEntity.class
 com/insurance/customer/adapter/out/cache/CustomerCacheAdapter.class
 com/insurance/customer/adapter/in/rest/dto/CustomerResponse$CustomerResponseBuilder.class
 com/insurance/customer/adapter/out/persistence/CustomerPersistenceAdapter.class
+com/insurance/customer/application/exception/InvalidCustomerDataException.class
 com/insurance/customer/adapter/out/persistence/repository/JpaCustomerRepository.class
 com/insurance/customer/adapter/in/rest/dto/AddressRequest.class
 com/insurance/customer/adapter/out/persistence/entity/CustomerEntity$CustomerEntityBuilder.class

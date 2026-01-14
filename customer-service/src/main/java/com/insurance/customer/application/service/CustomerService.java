@@ -1,20 +1,19 @@
 package com.insurance.customer.application.service;
 
+import com.insurance.customer.application.exception.InvalidCustomerDataException;
+import com.insurance.customer.application.exception.ServiceUnavailableException;
 import com.insurance.customer.domain.model.Customer;
 import com.insurance.customer.domain.port.in.*;
 import com.insurance.customer.domain.port.out.CustomerCachePort;
 import com.insurance.customer.domain.port.out.CustomerRepository;
 import com.insurance.customer.domain.port.out.EventPublisher;
-import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.insurance.customer.application.exception.CustomerAlreadyExistsException;
 import com.insurance.customer.application.exception.CustomerNotFoundException;
-import com.insurance.customer.application.exception.ServiceUnavailableException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,46 +39,42 @@ public class CustomerService implements
 
     @Override
     @Transactional
-    @CircuitBreaker(name = "customerService", fallbackMethod = "createCustomerFallback")
-    @RateLimiter(name = "customerService")
-    @Bulkhead(name = "customerService")
     public Customer execute(Customer customer) {
         log.info("Creating customer with CPF: {}", maskCpf(customer.getCpf()));
-        
+
         // Sanitize and validate
         customer.sanitizeCpf();
         if (customer.getAddress() != null) {
             customer.getAddress().sanitizeZipCode();
         }
-        
+
         validateCustomer(customer);
-        
+
         // Check if CPF already exists
         if (customerRepository.existsByCpf(customer.getCpf())) {
             log.warn("Customer with CPF {} already exists", maskCpf(customer.getCpf()));
             throw new CustomerAlreadyExistsException("Customer with CPF already exists");
         }
-        
+
         // Set timestamps
         customer.setId(UUID.randomUUID());
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
         customer.setVersion(0);
-        
+
         if (customer.getAddress() != null) {
             customer.getAddress().setId(UUID.randomUUID());
             customer.getAddress().setCustomerId(customer.getId());
             customer.getAddress().setCreatedAt(LocalDateTime.now());
             customer.getAddress().setUpdatedAt(LocalDateTime.now());
         }
-        
+
         // Save to database (within transaction)
         Customer savedCustomer = customerRepository.save(customer);
-        
+
         // Publish event for asynchronous cache invalidation (Transactional Outbox)
-        // Never evict cache within @Transactional to avoid dirty cache
         eventPublisher.publishCustomerCreated(savedCustomer.getId());
-        
+
         log.info("Customer created successfully with ID: {}", savedCustomer.getId());
         return savedCustomer;
     }
@@ -102,20 +97,17 @@ public class CustomerService implements
 
     @Override
     @Transactional(readOnly = true)
-    @CircuitBreaker(name = "customerService", fallbackMethod = "findByCpfFallback")
     public Customer findByCpf(String cpf) {
         log.info("Finding customer by CPF: {}", maskCpf(cpf));
-        
+
         String sanitizedCpf = cpf.replaceAll("\\D", "");
-        
+
         return customerRepository.findByCpf(sanitizedCpf)
-            .orElseThrow(() -> new CustomerNotFoundException("Customer not found with CPF: " + maskCpf(sanitizedCpf)));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with CPF: " + maskCpf(sanitizedCpf)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    @CircuitBreaker(name = "customerService", fallbackMethod = "findAllFallback")
-    @RateLimiter(name = "customerService")
     public List<Customer> findAll() {
         log.info("Finding all customers");
         return customerRepository.findAll();
@@ -123,8 +115,6 @@ public class CustomerService implements
 
     @Override
     @Transactional
-    @CircuitBreaker(name = "customerService", fallbackMethod = "updateCustomerFallback")
-    @RateLimiter(name = "customerService")
     public Customer execute(UUID customerId, Customer customer) {
         log.info("Updating customer with ID: {}", customerId);
         
@@ -178,8 +168,6 @@ public class CustomerService implements
 
     @Override
     @Transactional
-    @CircuitBreaker(name = "customerService", fallbackMethod = "deleteCustomerFallback")
-    @RateLimiter(name = "customerService")
     public void execute(UUID customerId) {
         log.info("Deleting customer with ID: {}", customerId);
         
@@ -200,21 +188,18 @@ public class CustomerService implements
      */
     private void validateCustomer(Customer customer) {
         if (!customer.isValidCpf()) {
-            throw new IllegalArgumentException("Invalid CPF");
+            throw new InvalidCustomerDataException("Invalid CPF format or checksum");
         }
-        
+
         if (!customer.isLegalAge()) {
-            throw new IllegalArgumentException("Customer must be at least 18 years old");
+            throw new InvalidCustomerDataException("Customer must be at least 18 years old");
         }
-        
+
         if (customer.getAddress() != null && !customer.getAddress().isComplete()) {
-            throw new IllegalArgumentException("Incomplete address information");
+            throw new InvalidCustomerDataException("Incomplete address information");
         }
     }
 
-    /**
-     * Masks CPF for logging (LGPD compliance)
-     */
     private String maskCpf(String cpf) {
         if (cpf == null || cpf.length() < 11) {
             return "***";
@@ -222,38 +207,10 @@ public class CustomerService implements
         return cpf.substring(0, 3) + ".***.***-" + cpf.substring(9);
     }
 
-    // Fallback methods for Circuit Breaker
-    
-    private Customer createCustomerFallback(Customer customer, Exception e) {
-        log.error("Fallback triggered for createCustomer: {}", e.getMessage());
-        throw new ServiceUnavailableException("Customer service is temporarily unavailable. Please try again later.");
-    }
-
     private Customer findByIdFallback(UUID customerId, Exception e) {
-        log.error("Fallback triggered for findById: {}", e.getMessage());
-        // Try to return from cache as last resort
+        log.warn("Fallback triggered for findById, attempting to return from cache: {}", e.getMessage());
         return customerCache.get(customerId)
-            .orElseThrow(() -> new ServiceUnavailableException("Customer service is temporarily unavailable"));
-    }
-
-    private Customer findByCpfFallback(String cpf, Exception e) {
-        log.error("Fallback triggered for findByCpf: {}", e.getMessage());
-        throw new ServiceUnavailableException("Customer service is temporarily unavailable");
-    }
-
-    private List<Customer> findAllFallback(Exception e) {
-        log.error("Fallback triggered for findAll: {}", e.getMessage());
-        throw new ServiceUnavailableException("Customer service is temporarily unavailable");
-    }
-
-    private Customer updateCustomerFallback(UUID customerId, Customer customer, Exception e) {
-        log.error("Fallback triggered for updateCustomer: {}", e.getMessage());
-        throw new ServiceUnavailableException("Customer service is temporarily unavailable");
-    }
-
-    private void deleteCustomerFallback(UUID customerId, Exception e) {
-        log.error("Fallback triggered for deleteCustomer: {}", e.getMessage());
-        throw new ServiceUnavailableException("Customer service is temporarily unavailable");
+                .orElseThrow(() -> new ServiceUnavailableException("Customer service is temporarily unavailable"));
     }
 }
 

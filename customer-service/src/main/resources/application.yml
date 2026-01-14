@@ -5,7 +5,7 @@ spring:
   application:
     name: customer-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/insurance_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/insurance_db}
     username: ${SPRING_DATASOURCE_USERNAME:insurance_user}
     password: ${SPRING_DATASOURCE_PASSWORD:insurance_pass}
     driver-class-name: org.postgresql.Driver
@@ -20,37 +20,32 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   redis:
-    host: ${SPRING_REDIS_HOST:localhost}
+    host: ${SPRING_REDIS_HOST:redis}
     port: ${SPRING_REDIS_PORT:6379}
     password: ${SPRING_REDIS_PASSWORD:redis_pass}
     timeout: 5000ms
-  cache:
-    type: redis
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus
+        include: health,info,metrics
 
 resilience4j:
   circuitbreaker:
     instances:
       customerService:
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        waitDurationInOpenState: 30s
+        registerHealthIndicator: true
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
         failureRateThreshold: 50
-  ratelimiter:
-    instances:
-      customerService:
-        limitForPeriod: 100
-        limitRefreshPeriod: 1s
-  bulkhead:
-    instances:
-      customerService:
-        maxConcurrentCalls: 25
+        ignoreExceptions:
+          - com.insurance.customer.application.exception.CustomerNotFoundException
+          - com.insurance.customer.application.exception.CustomerAlreadyExistsException
+          - com.insurance.customer.application.exception.InvalidCustomerDataException
 
 springdoc:
   api-docs:

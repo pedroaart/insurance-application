@@ -21,7 +21,7 @@ public class InsurancePolicy {
     private PolicyType policyType;
     private BigDecimal coverageAmount;
     private BigDecimal monthlyPremium;
-    private String status;
+    private PolicyStatus status;
     private LocalDate startDate;
     private LocalDate endDate;
     private String idempotencyKey;
@@ -30,6 +30,16 @@ public class InsurancePolicy {
     private Integer version;
 
     public static String generatePolicyNumber() {
-        return "POL-" + LocalDate.now().getYear() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "POL-" + LocalDate.now().getYear() + "-" +
+                UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    public boolean isActive() {
+        return PolicyStatus.ACTIVE.equals(status) &&
+                LocalDate.now().isBefore(endDate);
+    }
+
+    public BigDecimal calculateAnnualPremium() {
+        return monthlyPremium.multiply(new BigDecimal("12"));
     }
 }

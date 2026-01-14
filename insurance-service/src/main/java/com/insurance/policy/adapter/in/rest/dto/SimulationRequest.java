@@ -16,12 +16,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Request to simulate an insurance policy")
 public class SimulationRequest {
-
+    
     @NotNull(message = "Customer ID is required")
-    @Schema(description = "Customer's unique identifier", example = "123e4567-e89b-12d3-a456-426614174000")
+    @Schema(description = "Customer's unique identifier", example = "123e4567-e89b-12d3-a456-426614174000", required = true)
     private UUID customerId;
-
+    
     @NotNull(message = "Policy type is required")
-    @Schema(description = "Type of insurance policy", example = "GOLD")
+    @Schema(description = "Type of insurance policy (BRONZE, SILVER, or GOLD)", example = "GOLD", required = true)
     private PolicyType policyType;
 }
