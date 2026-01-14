@@ -10,11 +10,6 @@ YELLOW := \033[0;33m
 RED := \033[0;31m
 NC := \033[0m # No Color
 
-help: ## Show this help message
-	@echo "$(BLUE)Insurance Platform - Available Commands$(NC)"
-	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}'
-
 start: ## Start all containers (PostgreSQL, Redis, Services)
 	@echo "$(BLUE)Starting Insurance Platform...$(NC)"
 	@docker-compose up -d postgres redis
@@ -126,8 +121,3 @@ logs-customer: ## Show logs from customer service
 
 logs-insurance: ## Show logs from insurance service
 	@docker-compose logs -f insurance-service
-
-restart: stop start ## Restart all services
-
-full-deploy: clean start dml build api ## Full deployment (clean, start, migrate, build, deploy)
-	@echo "$(GREEN)✓ Full deployment completed!$(NC)"

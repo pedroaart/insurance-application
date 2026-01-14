@@ -12,3 +12,28 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+customer:
+  service:
+    url: ${CUSTOMER_SERVICE_URL:http://customer-service:8080}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      customerService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 50
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
+    com.insurance.policy: DEBUG
