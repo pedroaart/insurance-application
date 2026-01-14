@@ -1,4 +1,23 @@
-### Eclipse template
+### =========================
+### Build / Compiled artifacts
+### =========================
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.original
+
+# Maven compiler plugin status files
+.mvn/
+**/maven-status/
+**/maven-compiler-plugin/
+*.lst
+
+### =========================
+### Eclipse
+### =========================
 .metadata
 bin/
 tmp/
@@ -10,62 +29,37 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-*.class
-
-# External tool builders
 .externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
 *.launch
-
-# PyDev specific (Python IDE for Eclipse)
-*.pydevproject
-
-# CDT-specific (C/C++ Development Tooling)
+.pydevproject
 .cproject
-
-# CDT- autotools
 .autotools
-
-# Java annotation processor (APT)
 .factorypath
-
-# PDT-specific (PHP Development Tools)
 .buildpath
-
-# sbteclipse plugin
 .target
-
-# Tern plugin
 .tern-project
-
-# TeXlipse plugin
 .texlipse
-
-# STS (Spring Tool Suite)
 .springBeans
-
-# Code Recommenders
 .recommenders/
-
-# Annotation Processing
 .apt_generated/
 .apt_generated_test/
-
-# Scala IDE specific (Scala & Java development for Eclipse)
 .cache-main
 .scala_dependencies
 .worksheet
 
-# Uncomment this line if you wish to ignore the project description file.
-# Typically, this file would be tracked if it contains build/dependency configurations:
+# Optional
 #.project
 
-### Example user template template
-### Example user template
-
-# IntelliJ project files
-.idea
+### =========================
+### IntelliJ
+### =========================
+.idea/
 *.iml
-out
-gen
+out/
+gen/
+
+### =========================
+### OS / Misc
+### =========================
+.DS_Store
+Thumbs.db
