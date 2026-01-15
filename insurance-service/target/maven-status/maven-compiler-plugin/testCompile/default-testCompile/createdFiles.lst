@@ -1,0 +1,4 @@
+com/insurance/policy/application/service/ContractPolicyServiceTest.class
+com/insurance/policy/adapter/in/rest/InsuranceControllerTest.class
+com/insurance/policy/application/service/SimulatePolicyServiceTest.class
+com/insurance/policy/application/service/GetPolicyServiceTest.class

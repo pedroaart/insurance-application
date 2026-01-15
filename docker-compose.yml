@@ -2,16 +2,15 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: insurance-postgres
+    platform: linux/amd64
     environment:
       POSTGRES_DB: insurance_db
       POSTGRES_USER: insurance_user
       POSTGRES_PASSWORD: insurance_pass
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - insurance-network
     healthcheck:
@@ -23,7 +22,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: insurance-redis
-    command: redis-server --appendonly yes --requirepass redis_pass
+    platform: linux/amd64
+    command: redis-server --requirepass redis_pass
     ports:
       - "6379:6379"
     volumes:
@@ -41,16 +41,16 @@ services:
       context: ./customer-service
       dockerfile: Dockerfile
     container_name: customer-service
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
       SPRING_DATASOURCE_USERNAME: insurance_user
       SPRING_DATASOURCE_PASSWORD: insurance_pass
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       SPRING_REDIS_PASSWORD: redis_pass
-    ports:
-      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,40 +58,44 @@ services:
         condition: service_healthy
     networks:
       - insurance-network
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   insurance-service:
     build:
       context: ./insurance-service
       dockerfile: Dockerfile
     container_name: insurance-service
+    platform: linux/amd64
+    ports:
+      - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
       SPRING_DATASOURCE_USERNAME: insurance_user
       SPRING_DATASOURCE_PASSWORD: insurance_pass
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SPRING_REDIS_PASSWORD: redis_pass
       CUSTOMER_SERVICE_URL: http://customer-service:8080
-    ports:
-      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       customer-service:
-        condition: service_started
+        condition: service_healthy
     networks:
       - insurance-network
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
-  redis_data:
-  maven-cache:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 networks:
   insurance-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

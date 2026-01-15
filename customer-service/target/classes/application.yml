@@ -2,6 +2,11 @@ server:
   port: 8080
 
 spring:
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    schemas: public
   application:
     name: customer-service
   datasource:
@@ -57,3 +62,4 @@ logging:
   level:
     root: INFO
     com.insurance.customer: DEBUG
+
