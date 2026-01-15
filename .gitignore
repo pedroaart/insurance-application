@@ -1,6 +1,4 @@
-### =========================
-### Build / Compiled artifacts
-### =========================
+
 target/
 **/target/
 *.class

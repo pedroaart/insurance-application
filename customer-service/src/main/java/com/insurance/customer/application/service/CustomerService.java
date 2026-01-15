@@ -42,7 +42,6 @@ public class CustomerService implements
     public Customer execute(Customer customer) {
         log.info("Creating customer with CPF: {}", maskCpf(customer.getCpf()));
 
-        // Sanitize and validate
         customer.sanitizeCpf();
         if (customer.getAddress() != null) {
             customer.getAddress().sanitizeZipCode();
@@ -50,13 +49,11 @@ public class CustomerService implements
 
         validateCustomer(customer);
 
-        // Check if CPF already exists
         if (customerRepository.existsByCpf(customer.getCpf())) {
             log.warn("Customer with CPF {} already exists", maskCpf(customer.getCpf()));
             throw new CustomerAlreadyExistsException("Customer with CPF already exists");
         }
 
-        // Set timestamps
         customer.setId(UUID.randomUUID());
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
@@ -69,10 +66,8 @@ public class CustomerService implements
             customer.getAddress().setUpdatedAt(LocalDateTime.now());
         }
 
-        // Save to database (within transaction)
         Customer savedCustomer = customerRepository.save(customer);
 
-        // Publish event for asynchronous cache invalidation (Transactional Outbox)
         eventPublisher.publishCustomerCreated(savedCustomer.getId());
 
         log.info("Customer created successfully with ID: {}", savedCustomer.getId());
@@ -85,7 +80,6 @@ public class CustomerService implements
     public Customer findById(UUID customerId) {
         log.info("Finding customer by ID: {}", customerId);
         
-        // Cache-Aside pattern with version control
         return customerCache.get(customerId)
             .or(() -> {
                 Optional<Customer> customer = customerRepository.findById(customerId);
@@ -121,7 +115,6 @@ public class CustomerService implements
         Customer existingCustomer = customerRepository.findById(customerId)
             .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
         
-        // Sanitize and validate
         customer.sanitizeCpf();
         if (customer.getAddress() != null) {
             customer.getAddress().sanitizeZipCode();
@@ -129,13 +122,11 @@ public class CustomerService implements
         
         validateCustomer(customer);
         
-        // Check if CPF is being changed and if it already exists
-        if (!existingCustomer.getCpf().equals(customer.getCpf()) 
+        if (!existingCustomer.getCpf().equals(customer.getCpf())
             && customerRepository.existsByCpf(customer.getCpf())) {
             throw new CustomerAlreadyExistsException("Customer with new CPF already exists");
         }
         
-        // Update fields
         existingCustomer.setCpf(customer.getCpf());
         existingCustomer.setName(customer.getName());
         existingCustomer.setBirthDate(customer.getBirthDate());
@@ -159,7 +150,6 @@ public class CustomerService implements
         
         Customer updatedCustomer = customerRepository.save(existingCustomer);
         
-        // Publish event for cache invalidation
         eventPublisher.publishCustomerUpdated(updatedCustomer.getId());
         
         log.info("Customer updated successfully with ID: {}", updatedCustomer.getId());
@@ -177,15 +167,12 @@ public class CustomerService implements
         
         customerRepository.deleteById(customerId);
         
-        // Publish event for cache eviction
         eventPublisher.publishCustomerDeleted(customerId);
         
         log.info("Customer deleted successfully with ID: {}", customerId);
     }
 
-    /**
-     * Validates customer business rules
-     */
+
     private void validateCustomer(Customer customer) {
         if (!customer.isValidCpf()) {
             throw new InvalidCustomerDataException("Invalid CPF format or checksum");

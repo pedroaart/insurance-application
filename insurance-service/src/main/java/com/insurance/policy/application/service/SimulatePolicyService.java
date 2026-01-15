@@ -25,15 +25,11 @@ public class SimulatePolicyService implements SimulatePolicyUseCase {
     @Transactional
     public Simulation execute(UUID customerId, PolicyType policyType) {
         log.info("Simulating policy for customer: {} with type: {}", customerId, policyType);
-        
-        // Validar se o cliente existe (integração back-to-back)
-        // Circuit breaker está no CustomerClient
+
         customerValidator.validateExists(customerId);
         
-        // Criar simulação baseada no tipo de apólice
         Simulation simulation = Simulation.fromPolicyType(customerId, policyType);
         
-        // Persistir simulação para histórico e analytics
         Simulation savedSimulation = simulationRepository.save(simulation);
         
         log.info("Simulation created successfully: {} for customer: {}", 
