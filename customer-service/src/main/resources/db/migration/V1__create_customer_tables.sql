@@ -1,4 +1,3 @@
--- Customers table
 CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY,
     cpf VARCHAR(11) UNIQUE NOT NULL,
@@ -11,7 +10,6 @@ CREATE TABLE IF NOT EXISTS customers (
     CONSTRAINT chk_cpf_length CHECK (LENGTH(cpf) = 11)
 );
 
--- Addresses table
 CREATE TABLE IF NOT EXISTS addresses (
     id UUID PRIMARY KEY,
     customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
@@ -28,11 +26,9 @@ CREATE TABLE IF NOT EXISTS addresses (
     CONSTRAINT chk_state_length CHECK (LENGTH(state) = 2)
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_customers_cpf ON customers(cpf);
 CREATE INDEX IF NOT EXISTS idx_addresses_customer_id ON addresses(customer_id);
 
--- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -41,8 +37,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers
-CREATE TRIGGER update_customers_updated_at 
+CREATE TRIGGER update_customers_updated_at
     BEFORE UPDATE ON customers
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();

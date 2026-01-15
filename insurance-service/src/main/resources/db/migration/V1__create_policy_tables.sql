@@ -1,5 +1,4 @@
--- Function to update updated_at timestamp
--- This function needs to exist in this schema
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -8,7 +7,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Insurance Policies Table
 CREATE TABLE IF NOT EXISTS insurance_policies (
     id UUID PRIMARY KEY,
     customer_id UUID NOT NULL,
@@ -27,7 +25,6 @@ CREATE TABLE IF NOT EXISTS insurance_policies (
     CONSTRAINT chk_status CHECK (status IN ('ACTIVE', 'CANCELLED', 'EXPIRED', 'PENDING'))
 );
 
--- Policy Simulations Table
 CREATE TABLE IF NOT EXISTS policy_simulations (
     id UUID PRIMARY KEY,
     customer_id UUID NOT NULL,
@@ -38,14 +35,12 @@ CREATE TABLE IF NOT EXISTS policy_simulations (
     CONSTRAINT chk_sim_policy_type CHECK (policy_type IN ('BRONZE', 'SILVER', 'GOLD'))
 );
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_insurance_policies_customer_id ON insurance_policies(customer_id);
 CREATE INDEX IF NOT EXISTS idx_insurance_policies_policy_number ON insurance_policies(policy_number);
 CREATE INDEX IF NOT EXISTS idx_insurance_policies_idempotency ON insurance_policies(idempotency_key);
 CREATE INDEX IF NOT EXISTS idx_policy_simulations_customer_id ON policy_simulations(customer_id);
 
--- Trigger for updated_at
-CREATE TRIGGER update_insurance_policies_updated_at 
+CREATE TRIGGER update_insurance_policies_updated_at
     BEFORE UPDATE ON insurance_policies
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
