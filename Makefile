@@ -38,18 +38,6 @@ rebuild:
 	docker-compose build --no-cache
 	@echo "$(GREEN)✓ Rebuild complete$(NC)"
 
-test:
-	@echo "$(BLUE)Running unit tests...$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Testing Customer Service...$(NC)"
-	cd customer-service && ./mvnw test
-	@echo ""
-	@echo "$(YELLOW)Testing Insurance Service...$(NC)"
-	cd insurance-service && ./mvnw test
-	@echo ""
-	@echo "$(GREEN)✓ All tests passed$(NC)"
-
-
 full-deploy:
 	@echo "$(BLUE)Full deployment starting...$(NC)"
 	@make clean

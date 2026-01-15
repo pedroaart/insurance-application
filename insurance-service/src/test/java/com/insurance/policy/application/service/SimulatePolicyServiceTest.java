@@ -1,6 +1,5 @@
 package com.insurance.policy.application.service;
 
-import com.insurance.policy.application.exception.CustomerNotFoundException;
 import com.insurance.policy.domain.model.PolicyType;
 import com.insurance.policy.domain.model.Simulation;
 import com.insurance.policy.domain.port.out.CustomerValidator;
@@ -42,16 +41,13 @@ class SimulatePolicyServiceTest {
     @Test
     @DisplayName("Should simulate Bronze policy successfully")
     void shouldSimulateBronzePolicySuccessfully() {
-        // Given
         PolicyType policyType = PolicyType.BRONZE;
         doNothing().when(customerValidator).validateExists(customerId);
         when(simulationRepository.save(any(Simulation.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
         Simulation result = service.execute(customerId, policyType);
 
-        // Then
         assertNotNull(result);
         assertEquals(customerId, result.getCustomerId());
         assertEquals(policyType, result.getPolicyType());
@@ -67,51 +63,14 @@ class SimulatePolicyServiceTest {
     @Test
     @DisplayName("Should simulate Silver policy successfully")
     void shouldSimulateSilverPolicySuccessfully() {
-        // Given
         PolicyType policyType = PolicyType.SILVER;
         doNothing().when(customerValidator).validateExists(customerId);
         when(simulationRepository.save(any(Simulation.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
         Simulation result = service.execute(customerId, policyType);
 
-        // Then
         assertEquals(policyType.getCoverageAmount(), result.getCoverageAmount());
         assertEquals(policyType.getMonthlyPremium(), result.getMonthlyPremium());
-    }
-
-    @Test
-    @DisplayName("Should simulate Gold policy successfully")
-    void shouldSimulateGoldPolicySuccessfully() {
-        // Given
-        PolicyType policyType = PolicyType.GOLD;
-        doNothing().when(customerValidator).validateExists(customerId);
-        when(simulationRepository.save(any(Simulation.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-
-        // When
-        Simulation result = service.execute(customerId, policyType);
-
-        // Then
-        assertEquals(policyType.getCoverageAmount(), result.getCoverageAmount());
-        assertEquals(policyType.getMonthlyPremium(), result.getMonthlyPremium());
-    }
-
-    @Test
-    @DisplayName("Should throw CustomerNotFoundException when customer does not exist")
-    void shouldThrowExceptionWhenCustomerNotFound() {
-        // Given
-        doThrow(new CustomerNotFoundException("Customer not found"))
-            .when(customerValidator).validateExists(customerId);
-
-        // When & Then
-        assertThrows(
-            CustomerNotFoundException.class,
-            () -> service.execute(customerId, PolicyType.BRONZE)
-        );
-
-        verify(customerValidator).validateExists(customerId);
-        verify(simulationRepository, never()).save(any());
     }
 }

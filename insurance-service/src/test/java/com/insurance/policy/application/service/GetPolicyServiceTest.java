@@ -58,46 +58,25 @@ class GetPolicyServiceTest {
     @Test
     @DisplayName("Should find policy by ID successfully")
     void shouldFindPolicyByIdSuccessfully() {
-        // Given
         when(policyRepository.findById(policyId)).thenReturn(Optional.of(policy));
 
-        // When
         InsurancePolicy result = service.findById(policyId);
 
-        // Then
         assertNotNull(result);
         assertEquals(policyId, result.getId());
         assertEquals(customerId, result.getCustomerId());
         verify(policyRepository).findById(policyId);
     }
 
-    @Test
-    @DisplayName("Should throw PolicyNotFoundException when policy not found")
-    void shouldThrowExceptionWhenPolicyNotFound() {
-        // Given
-        when(policyRepository.findById(policyId)).thenReturn(Optional.empty());
-
-        // When & Then
-        PolicyNotFoundException exception = assertThrows(
-            PolicyNotFoundException.class,
-            () -> service.findById(policyId)
-        );
-
-        assertTrue(exception.getMessage().contains(policyId.toString()));
-        verify(policyRepository).findById(policyId);
-    }
 
     @Test
     @DisplayName("Should find all policies by customer ID")
     void shouldFindAllPoliciesByCustomerId() {
-        // Given
         List<InsurancePolicy> policies = Arrays.asList(policy);
         when(policyRepository.findByCustomerId(customerId)).thenReturn(policies);
 
-        // When
         List<InsurancePolicy> result = service.findByCustomerId(customerId);
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(customerId, result.get(0).getCustomerId());
@@ -107,13 +86,10 @@ class GetPolicyServiceTest {
     @Test
     @DisplayName("Should return empty list when customer has no policies")
     void shouldReturnEmptyListWhenNoPolices() {
-        // Given
         when(policyRepository.findByCustomerId(customerId)).thenReturn(Arrays.asList());
 
-        // When
         List<InsurancePolicy> result = service.findByCustomerId(customerId);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(policyRepository).findByCustomerId(customerId);

@@ -58,7 +58,6 @@ class InsuranceControllerTest {
     @Test
     @DisplayName("Should simulate policy successfully")
     void shouldSimulatePolicySuccessfully() throws Exception {
-        // Given
         UUID customerId = UUID.randomUUID();
         SimulationRequest request = SimulationRequest.builder()
             .customerId(customerId)
@@ -78,7 +77,6 @@ class InsuranceControllerTest {
         when(simulatePolicyUseCase.execute(any(), any())).thenReturn(simulation);
         when(policyMapper.toSimulationResponse(any())).thenCallRealMethod();
 
-        // When & Then
         mockMvc.perform(post("/api/v1/insurance/simulate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -92,7 +90,6 @@ class InsuranceControllerTest {
     @Test
     @DisplayName("Should return 404 when customer not found in simulation")
     void shouldReturn404WhenCustomerNotFoundInSimulation() throws Exception {
-        // Given
         UUID customerId = UUID.randomUUID();
         SimulationRequest request = SimulationRequest.builder()
             .customerId(customerId)
@@ -102,7 +99,6 @@ class InsuranceControllerTest {
         when(simulatePolicyUseCase.execute(any(), any()))
             .thenThrow(new CustomerNotFoundException("Customer not found"));
 
-        // When & Then
         mockMvc.perform(post("/api/v1/insurance/simulate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -112,7 +108,6 @@ class InsuranceControllerTest {
     @Test
     @DisplayName("Should contract policy successfully")
     void shouldContractPolicySuccessfully() throws Exception {
-        // Given
         UUID customerId = UUID.randomUUID();
         String idempotencyKey = "contract-123";
         ContractRequest request = ContractRequest.builder()
@@ -134,7 +129,6 @@ class InsuranceControllerTest {
         when(contractPolicyUseCase.execute(any(), any(), anyString())).thenReturn(policy);
         when(policyMapper.toPolicyResponse(any())).thenCallRealMethod();
 
-        // When & Then
         mockMvc.perform(post("/api/v1/insurance/contract")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -146,7 +140,6 @@ class InsuranceControllerTest {
     @Test
     @DisplayName("Should return 409 when duplicate idempotency key")
     void shouldReturn409WhenDuplicateIdempotencyKey() throws Exception {
-        // Given
         ContractRequest request = ContractRequest.builder()
             .customerId(UUID.randomUUID())
             .policyType(PolicyType.GOLD)
@@ -156,7 +149,6 @@ class InsuranceControllerTest {
         when(contractPolicyUseCase.execute(any(), any(), anyString()))
             .thenThrow(new DuplicateRequestException("Already processed", "duplicate-key"));
 
-        // When & Then
         mockMvc.perform(post("/api/v1/insurance/contract")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -166,7 +158,6 @@ class InsuranceControllerTest {
     @Test
     @DisplayName("Should return 409 when customer already has active policy")
     void shouldReturn409WhenCustomerAlreadyHasActivePolicy() throws Exception {
-        // Given
         ContractRequest request = ContractRequest.builder()
             .customerId(UUID.randomUUID())
             .policyType(PolicyType.BRONZE)
@@ -176,7 +167,6 @@ class InsuranceControllerTest {
         when(contractPolicyUseCase.execute(any(), any(), anyString()))
             .thenThrow(new PolicyAlreadyExistsException("Already has policy"));
 
-        // When & Then
         mockMvc.perform(post("/api/v1/insurance/contract")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
