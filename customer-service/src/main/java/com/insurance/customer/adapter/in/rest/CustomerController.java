@@ -25,10 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * REST Controller for Customer operations.
- * Implements the Adapter pattern (Hexagonal Architecture).
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/customers")

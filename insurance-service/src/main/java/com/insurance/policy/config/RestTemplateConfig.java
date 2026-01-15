@@ -7,11 +7,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
-/**
- * RestTemplate configuration with timeouts.
- * 
- * Timeouts are CRITICAL in microservices to prevent thread exhaustion.
- */
+
 @Configuration
 public class RestTemplateConfig {
     

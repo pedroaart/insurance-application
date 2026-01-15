@@ -28,15 +28,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * REST Controller for Insurance Policy operations.
- * 
- * Endpoints:
- * - POST /api/v1/insurance/simulate - Simulate insurance policy
- * - POST /api/v1/insurance/contract - Contract insurance policy (idempotent)
- * - GET /api/v1/insurance/{policyId} - Get policy by ID
- * - GET /api/v1/insurance/customer/{customerId} - Get policies by customer
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/insurance")

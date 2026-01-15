@@ -11,10 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Mapper for converting between domain models and DTOs.
- * Follows the Adapter pattern to isolate domain from external representations.
- */
 @Component
 public class CustomerMapper {
     

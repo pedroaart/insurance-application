@@ -54,13 +54,6 @@ public class CustomerClient implements CustomerValidator {
         }
     }
 
-    /**
-     * Fallback when Customer Service is unavailable.
-     *
-     * CRITICAL DECISION: In financial systems, we FAIL FAST instead of
-     * returning cached/default data. Better to reject the transaction
-     * than to proceed with potentially stale information.
-     */
     private void validateExistsFallback(UUID customerId, Exception e) {
         log.error("Circuit breaker activated for customer validation. Customer ID: {}, Error: {}",
                 customerId, e.getMessage());

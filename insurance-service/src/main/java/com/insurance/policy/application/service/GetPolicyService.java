@@ -12,11 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Service for querying insurance policies.
- * 
- * Read operations that can leverage cache for performance.
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +27,7 @@ public class GetPolicyService implements GetPolicyUseCase {
         
         return policyRepository.findById(policyId)
             .orElseThrow(() -> new PolicyNotFoundException(
-                "Policy not found with ID: " + policyId
+                "Policy not found id: " + policyId
             ));
     }
 

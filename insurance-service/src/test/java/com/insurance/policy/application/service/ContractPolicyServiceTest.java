@@ -24,15 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for ContractPolicyService.
- * 
- * Tests cover:
- * - Happy path
- * - Idempotency validation
- * - Customer validation
- * - Duplicate policy prevention
- */
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Contract Policy Service Tests")
 class ContractPolicyServiceTest {

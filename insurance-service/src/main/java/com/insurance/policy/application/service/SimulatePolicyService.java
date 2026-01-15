@@ -13,12 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/**
- * Service responsible for simulating insurance policies.
- * 
- * This is a READ-ONLY operation that doesn't modify state,
- * so it's lightweight and can be cached aggressively.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
